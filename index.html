@@ -1,82 +1,129 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Доступ в FastGuide</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      border-radius: 15px;
-      padding: 20px;
-      max-width: 400px;
-      width: 100%;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-    p {
-      color: #666;
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    .price {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      background-color: #4CAF50;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-    .btn:hover {
-      background-color: #45a049;
-    }
-    .btn-secondary {
-      background-color: #2196F3;
-    }
-    .btn-secondary:hover {
-      background-color: #1976D2;
-    }
-  </style>
-</head>
-<body>
+<script>
+  // CONFIG
+  const LAVA_URL_RU = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/6783c63f-0fd4-4afb-9d99-951df743767b?currency=RUB';
+  const LAVA_URL_INT = 'https://example.com/pay?currency=USD'; // <— замени на свою ссылку
+  const PRODUCT = 'Доступ в FastGuide';
+  const PRICE_RU = '390 RUB';
+  const PRICE_INT = '10 USD'; // <— замени на свою сумму
 
-  <div class="container">
-    <h1>Доступ в FastGuide</h1>
-    <p>Получите полный доступ к материалам и обновлениям</p>
-    <div class="price">390 ₽ / 5 USD</div>
+  // STATE
+  let method = '';
+  let email = '';
+  let price = PRICE_RU;
+  let payUrl = LAVA_URL_RU;
 
-    <a class="btn" href="https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=EUR" target="_blank">
-      Оплата через РФ банк
-    </a>
+  // elements
+  const mRus = document.getElementById('m_rus');
+  const mInt = document.getElementById('m_int');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  const p1 = document.getElementById('stepIndicator1');
+  const p2 = document.getElementById('stepIndicator2');
+  const p3 = document.getElementById('stepIndicator3');
+  const cMethod = document.getElementById('c_method');
+  const cEmail = document.getElementById('c_email');
+  const openPayment = document.getElementById('openPayment');
+  const priceEls = document.querySelectorAll('.price span:first-child');
+  const confirmPriceEl = document.querySelector('#step2 .value:last-child');
 
-    <a class="btn btn-secondary" href="https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/6783c63f-0fd4-4afb-9d99-951df743767b?currency=EUR" target="_blank">
-      Оплата через иностранный банк
-    </a>
-  </div>
+  // choose method
+  function choose(name, el){
+    method = name;
+    [mRus, mInt].forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
 
-</body>
-</html>
+    if(name === 'Банк РФ') {
+      price = PRICE_RU;
+      payUrl = LAVA_URL_RU;
+    } else {
+      price = PRICE_INT;
+      payUrl = LAVA_URL_INT;
+    }
+
+    priceEls.forEach(el => el.textContent = price.split(' ')[0]);
+    confirmPriceEl.textContent = price;
+    document.getElementById('email').focus();
+  }
+
+  // validation email
+  function isEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  // go to confirm
+  function toStep2(){
+    const e = document.getElementById('email').value.trim();
+    if(!method) { alert('Выберите метод оплаты'); return; }
+    if(!isEmail(e)) { alert('Введите корректный email'); document.getElementById('email').focus(); return; }
+    email = e;
+    cMethod.textContent = method;
+    cEmail.textContent = email;
+    confirmPriceEl.textContent = price;
+
+    p1.classList.remove('active'); p1.classList.add('done');
+    p2.classList.add('active');
+
+    step1.style.display = 'none';
+    step2.style.display = 'block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function backToStep1(e){
+    if(e) e.preventDefault();
+    step2.style.display = 'none';
+    step1.style.display = 'block';
+    p2.classList.remove('active'); p1.classList.remove('done'); p1.classList.add('active');
+  }
+
+  // proceed to payment
+  function proceedToPay(){
+    let url = payUrl;
+    try {
+      const u = new URL(payUrl);
+      if(email) u.searchParams.set('buyer_email', email);
+      u.searchParams.set('utm_source', 'fastguide_miniapp');
+      url = u.toString();
+    } catch(e){ url = payUrl; }
+
+    openPayment.href = url;
+
+    const wnd = window.open(url, '_blank');
+    if(!wnd){
+      alert('Браузер заблокировал открытие. Нажмите "Открыть страницу оплаты".');
+    }
+
+    step2.style.display = 'none';
+    step3.style.display = 'block';
+    p2.classList.remove('active'); p2.classList.add('done');
+    p3.classList.add('active');
+
+    startPolling();
+  }
+
+  function startPolling(){
+    const params = new URLSearchParams(location.search);
+    if(params.get('debug') === '1') document.getElementById('devActions').style.display = 'block';
+  }
+
+  function onPaid(info){
+    alert('Оплата подтверждена — выдан доступ.');
+  }
+
+  function simulateSuccess(){
+    onPaid({status:'paid'});
+  }
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      if(step1.style.display !== 'none') toStep2();
+      else if(step2.style.display !== 'none') proceedToPay();
+    }
+  });
+
+  [mRus, mInt].forEach(el=>{
+    el.addEventListener('keydown', (ev)=>{
+      if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
+    });
+  });
+</script>
