@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Доступ в FastGuide — оплата</title>
+<style>
+  :root{
+    --bg:#030305;
+    --panel:#0d0d0f;
+    --muted:#9aa0a6;
+    --accent:#2ac26b;
+    --accent-2:#21a858;
+    --card-shadow: 0 20px 50px rgba(0,0,0,0.55);
+    --radius:14px;
+    --glass: rgba(255,255,255,0.02);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#070708);color:#fff;-webkit-font-smoothing:antialiased}
+  /* center app */
+  .wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+  }
+  .app{
+    width:100%;
+    max-width:420px;
+    border-radius:20px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
+    box-shadow:var(--card-shadow);
+    overflow:hidden;
+  }
+
+  /* header / topbar */
+  .top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-bottom:1px solid rgba(255,255,255,0.02);
+  }
+  .top .title{font-weight:700;font-size:16px}
+  .top .sub{font-size:12px;color:var(--muted)}
+
+  /* content card */
+  .card{
+    padding:18px;
+    background:linear-gradient(180deg,var(--panel), #0b0b0c);
+  }
+
+  /* steps */
+  .steps{
+    display:flex;align-items:center;gap:6px;margin-bottom:14px;
+  }
+  .step{
+    flex:1;text-align:center;
+    font-size:12px;color:var(--muted);
+  }
+  .step .dot{
+    width:34px;height:34px;border-radius:999px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+    background:var(--glass);border:1px solid rgba(255,255,255,0.04);font-weight:700;color:var(--muted)
+  }
+  .step.active .dot{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#02120a;box-shadow:0 8px 22px rgba(34,170,102,0.18)}
+  .step.done .dot{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+  /* main heading */
+  .heading{font-size:26px;font-weight:700;margin:6px 0 6px}
+  .subhead{color:var(--muted);margin-bottom:14px}
+
+  /* payment options */
+  .methods{display:flex;gap:12px;margin-bottom:14px}
+  .method{
+    flex:1;padding:12px;border-radius:12px;background:#151515;border:1px solid rgba(255,255,255,0.02);cursor:pointer;text-align:center;font-weight:600;color:#e9ecef
+  }
+  .method.active{background:#1f1f1f;box-shadow:inset 0 -4px 0 rgba(0,0,0,0.25)}
+
+  /* input */
+  .field{width:100%;padding:14px;border-radius:12px;border:none;background:#0b0b0b;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
+  .placeholder{color:#7f858a}
+
+  /* price */
+  .price-row{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0}
+  .price{font-size:36px;font-weight:800;letter-spacing:-0.02em}
+  .price-currency{font-size:14px;color:var(--muted);margin-left:8px;font-weight:600}
+
+  /* main button */
+  .btn{
+    width:100%;display:inline-block;padding:14px;border-radius:12px;border:none;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#02120a;font-weight:800;font-size:16px;cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .ghost{display:block;margin-top:12px;text-align:center;color:var(--muted);text-decoration:none}
+
+  /* confirm card */
+  .confirm{background:#0a0a0a;border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
+  .row{padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);margin-bottom:8px}
+  .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .value{font-size:16px;font-weight:700}
+
+  /* waiting */
+  .wait{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px}
+  .orb{width:96px;height:96px;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(40,194,110,0.14)}
+  .wait p{font-size:18px;text-align:center;color:#e7efe9}
+
+  /* small */
+  .muted{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
+
+  /* responsive */
+  @media (max-width:420px){
+    .heading{font-size:22px}
+    .price{font-size:30px}
+    .top{padding:12px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="app" role="application" aria-label="Оплата — Доступ в FastGuide">
+      <div class="top">
+        <div>
+          <div class="title">FastGuide</div>
+          <div class="sub">мини-приложение</div>
+        </div>
+        <div style="font-size:13px;color:var(--muted)">Оплата</div>
+      </div>
+
+      <div class="card" id="card">
+        <!-- steps -->
+        <div class="steps" aria-hidden="true">
+          <div class="step active" id="stepIndicator1"><div class="dot">1</div>Выбор</div>
+          <div class="step" id="stepIndicator2"><div class="dot">2</div>Данные</div>
+          <div class="step" id="stepIndicator3"><div class="dot">3</div>Оплата</div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div id="step1">
+          <div class="heading">Доступ в FastGuide</div>
+          <div class="subhead">Выберите метод оплаты</div>
+
+          <div class="methods" role="list">
+            <div class="method" id="m_rus" role="button" tabindex="0" onclick="choose('Банк РФ', this)">Банк РФ</div>
+            <div class="method" id="m_int" role="button" tabindex="0" onclick="choose('Иностранный банк', this)">Иностранный банк</div>
+          </div>
+
+          <input id="email" class="field" type="email" inputmode="email" autocomplete="email" placeholder="example@gmail.com" aria-label="Email">
+
+          <div class="price-row">
+            <div class="muted">Стоимость</div>
+            <div class="price"><span id="priceValue">990</span><span class="price-currency" id="priceCurrency">RUB</span></div>
+          </div>
+
+          <button class="btn" id="nextBtn" onclick="toStep2()">Далее</button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step2" style="display:none">
+          <div class="heading" style="font-size:20px">Проверьте данные</div>
+          <div class="muted" style="margin-bottom:12px">Убедитесь, что всё введено верно</div>
+
+          <div class="confirm">
+            <div class="row">
+              <div class="label">Наименование товара</div>
+              <div class="value">Доступ в FastGuide</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Метод оплаты</div>
+              <div id="c_method" class="value">—</div>
+            </div>
+
+            <div class="row">
+              <div class="label">Ваш E-mail</div>
+              <div id="c_email" class="value">—</div>
+            </div>
+
+            <div class="row" style="margin-bottom:0">
+              <div class="label">Стоимость</div>
+              <div class="value" id="confirmPrice">990 RUB</div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <button class="btn" id="payBtn" onclick="proceedToPay()">Перейти к оплате</button>
+            <a class="ghost" href="#" onclick="backToStep1(event)">Вернуться назад</a>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="step3" style="display:none">
+          <div class="wait">
+            <div class="orb" aria-hidden="true">
+              <!-- hourglass-ish icon -->
+              <svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 7h8" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 17h8" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 7.5s-1.5 1.5-4 1.5-4-1.5-4-1.5" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 16.5s1.5-1.5 4-1.5 4 1.5 4 1.5" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p>Переадресация на страницу оплаты...</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Инициализация переменных
+  let selectedMethod = null;
+  const priceRUB = 990;
+  const priceUSD = 13.73;
+  const urlRUB = "https://app.lava.top/ru/products/f8c0ba81-00ae-4c20-8449-42c00ef749b0?currency=RUB";
+  const urlUSD = "https://app.lava.top/ru/products/f8c0ba81-00ae-4c20-8449-42c00ef749b0?currency=USD";
+
+  function choose(method, el) {
+    selectedMethod = method;
+    // Снять активность у всех
+    document.querySelectorAll('.method').forEach(m => m.classList.remove('active'));
+    // Пометить выбранный
+    el.classList.add('active');
+
+    // Обновить цену
+    const priceValueEl = document.getElementById('priceValue');
+    const priceCurrencyEl = document.getElementById('priceCurrency');
+    if (method === 'Банк РФ') {
+      priceValueEl.textContent = priceRUB;
+      priceCurrencyEl.textContent = 'RUB';
+    } else {
+      priceValueEl.textContent = priceUSD;
+      priceCurrencyEl.textContent = 'USD';
+    }
+  }
+
+  function toStep2() {
+    const emailInput = document.getElementById('email');
+    if (!selectedMethod) {
+      alert('Пожалуйста, выберите метод оплаты.');
+      return;
+    }
+    if (!emailInput.value || !emailInput.checkValidity()) {
+      alert('Пожалуйста, введите корректный email.');
+      return;
+    }
+
+    // Обновляем данные в подтверждении
+    document.getElementById('c_method').textContent = selectedMethod;
+    document.getElementById('c_email').textContent = emailInput.value;
+
+    const confirmPriceEl = document.getElementById('confirmPrice');
+    if (selectedMethod === 'Банк РФ') {
+      confirmPriceEl.textContent = `${priceRUB} RUB`;
+    } else {
+      confirmPriceEl.textContent = `${priceUSD} USD`;
+    }
+
+    // Переходим к шагу 2
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+
+    // Обновляем шаги
+    document.getElementById('stepIndicator1').classList.remove('active');
+    document.getElementById('stepIndicator1').classList.add('done');
+    document.getElementById('stepIndicator2').classList.add('active');
+  }
+
+  function backToStep1(event) {
+    event.preventDefault();
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+
+    // Обновляем шаги
+    document.getElementById('stepIndicator2').classList.remove('active');
+    document.getElementById('stepIndicator1').classList.remove('done');
+    document.getElementById('stepIndicator1').classList.add('active');
+  }
+
+  function proceedToPay() {
+    // Переходим к шагу 3
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'block';
+
+    // Обновляем шаги
+    document.getElementById('stepIndicator2').classList.remove('active');
+    document.getElementById('stepIndicator2').classList.add('done');
+    document.getElementById('stepIndicator3').classList.add('active');
+
+    // Переадресация на страницу оплаты
+    let paymentUrl = selectedMethod === 'Банк РФ' ? urlRUB : urlUSD;
+    window.location.href = paymentUrl;
+  }
+
+  // Предустановить метод по умолчанию (если нужно)
+  // choose('Банк РФ', document.getElementById('m_rus'));
+</script>
+
+</body>
+</html>
