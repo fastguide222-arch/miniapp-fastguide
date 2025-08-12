@@ -151,7 +151,7 @@
 
           <div class="price-row">
             <div class="muted">Стоимость</div>
-            <div class="price"><span>290</span><span class="price-currency">RUB</span></div>
+            <div class="price"><span>390</span><span class="price-currency">RUB</span></div>
           </div>
 
           <button class="btn" id="nextBtn" onclick="toStep2()">Далее</button>
@@ -180,7 +180,7 @@
 
             <div class="row" style="margin-bottom:0">
               <div class="label">Стоимость</div>
-              <div class="value">290 RUB</div>
+              <div id="c_price" class="value">390 RUB</div>
             </div>
           </div>
 
@@ -194,7 +194,6 @@
         <div id="step3" style="display:none">
           <div class="wait">
             <div class="orb" aria-hidden="true">
-              <!-- hourglass-ish icon -->
               <svg width="46" height="46" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M8 7h8" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M8 17h8" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -213,27 +212,21 @@
           </div>
         </div>
 
-      </div><!-- card -->
-    </div><!-- app -->
-  </div><!-- wrap -->
+      </div>
+    </div>
+  </div>
 
 <script>
-  // CONFIG
-  const LAVA_URL = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/6783c63f-0fd4-4afb-9d99-951df743767b?currency=RUB';
+  const LAVA_URL_RUB = 'https://app.lava.top/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=RUB';
+  const LAVA_URL_USD = 'https://app.lava.top/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=USD';
   const PRODUCT = 'Доступ в FastGuide';
-  const PRICE = '290 RUB';
+  const PRICE_RUB = '390 RUB';
+  const PRICE_USD = '5 USD';
 
-  <script>
-  // CONFIG
-  const LAVA_URL = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/6783c63f-0fd4-4afb-9d99-951df743767b?currency=USD';
-  const PRODUCT = 'Доступ в FastGuide';
-  const PRICE = '5 USD';
-  
-  // STATE
   let method = '';
   let email = '';
+  let currentPrice = PRICE_RUB;
 
-  // elements
   const mRus = document.getElementById('m_rus');
   const mInt = document.getElementById('m_int');
   const step1 = document.getElementById('step1');
@@ -244,37 +237,39 @@
   const p3 = document.getElementById('stepIndicator3');
   const cMethod = document.getElementById('c_method');
   const cEmail = document.getElementById('c_email');
+  const cPrice = document.getElementById('c_price');
   const openPayment = document.getElementById('openPayment');
 
-  // choose method
   function choose(name, el){
     method = name;
     [mRus, mInt].forEach(x => x.classList.remove('active'));
     el.classList.add('active');
-    // focus email
+    if(method === 'Банк РФ'){
+      currentPrice = PRICE_RUB;
+      document.querySelector('.price-row .price span:first-child').textContent = '390';
+      document.querySelector('.price-row .price-currency').textContent = 'RUB';
+    } else {
+      currentPrice = PRICE_USD;
+      document.querySelector('.price-row .price span:first-child').textContent = '5';
+      document.querySelector('.price-row .price-currency').textContent = 'USD';
+    }
     document.getElementById('email').focus();
   }
 
-  // validation email
   function isEmail(v){
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
 
-  // go to confirm
   function toStep2(){
     const e = document.getElementById('email').value.trim();
     if(!method) { alert('Выберите метод оплаты'); return; }
     if(!isEmail(e)) { alert('Введите корректный email'); document.getElementById('email').focus(); return; }
     email = e;
-    // fill confirm
     cMethod.textContent = method;
     cEmail.textContent = email;
-
-    // UI progress
+    cPrice.textContent = currentPrice;
     p1.classList.remove('active'); p1.classList.add('done');
     p2.classList.add('active');
-
-    // show/hide
     step1.style.display = 'none';
     step2.style.display = 'block';
     window.scrollTo({top:0,behavior:'smooth'});
@@ -287,63 +282,41 @@
     p2.classList.remove('active'); p1.classList.remove('done'); p1.classList.add('active');
   }
 
-  // proceed to payment
   function proceedToPay(){
-    // build url: append buyer email and utm so Lava may pick it (if supported)
-    let url = LAVA_URL;
+    let url = method === 'Банк РФ' ? LAVA_URL_RUB : LAVA_URL_USD;
     try {
-      const u = new URL(LAVA_URL);
+      const u = new URL(url);
       if(email) u.searchParams.set('buyer_email', email);
       u.searchParams.set('utm_source', 'fastguide_miniapp');
       url = u.toString();
-    } catch(e){ url = LAVA_URL; }
-
-    // set link for manual open
+    } catch(e){}
     openPayment.href = url;
-
-    // open in new tab / window
     const wnd = window.open(url, '_blank');
     if(!wnd){
       alert('Браузер заблокировал открытие. Нажмите "Открыть страницу оплаты".');
     }
-
-    // UI progress and show waiting
     step2.style.display = 'none';
     step3.style.display = 'block';
     p2.classList.remove('active'); p2.classList.add('done');
     p3.classList.add('active');
-
-    // start polling placeholder (replace with real check via your server)
     startPolling();
   }
 
-  // polling sample (placeholder): in real setup poll your server that receives Lava webhook
   let pollTimer = null;
   function startPolling(){
-    // If url contains debug=1 -> show simulate
     const params = new URLSearchParams(location.search);
     if(params.get('debug') === '1') document.getElementById('devActions').style.display = 'block';
-
-    // Polling example commented out. Implement server endpoint /check-payment for production.
-    // pollTimer = setInterval(async ()=>{
-    //   const res = await fetch('/check-payment?email=' + encodeURIComponent(email));
-    //   const data = await res.json();
-    //   if(data && data.status === 'paid'){ onPaid(data); clearInterval(pollTimer); }
-    // }, 4000);
   }
 
   function onPaid(info){
     clearInterval(pollTimer);
     alert('Оплата подтверждена — выдан доступ.');
-    // here you can redirect or show access details
   }
 
-  // debug simulate
   function simulateSuccess(){
     onPaid({status:'paid'});
   }
 
-  // keyboard UX: allow selection by Enter
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){
       if(step1.style.display !== 'none') toStep2();
@@ -351,7 +324,6 @@
     }
   });
 
-  // small accessibility: make method buttons focusable by keyboard
   [mRus, mInt].forEach(el=>{
     el.addEventListener('keydown', (ev)=>{
       if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
@@ -360,3 +332,4 @@
 </script>
 </body>
 </html>
+
