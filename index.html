@@ -1,129 +1,120 @@
-<script>
-  // CONFIG
-  const LAVA_URL_RU = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/6783c63f-0fd4-4afb-9d99-951df743767b?currency=RUB';
-  const LAVA_URL_INT = 'https://example.com/pay?currency=USD'; // <— замени на свою ссылку
-  const PRODUCT = 'Доступ в FastGuide';
-  const PRICE_RU = '390 RUB';
-  const PRICE_INT = '10 USD'; // <— замени на свою сумму
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Оплата — FastGuide</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #333; }
+  .container { max-width: 600px; margin: auto; padding: 20px; background: #fff; border-radius: 10px; }
+  h1 { text-align: center; }
+  .price { font-size: 1.4em; text-align: center; margin: 10px 0; }
+  .steps { display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .step { text-align: center; flex: 1; }
+  .step.active { font-weight: bold; color: #007bff; }
+  .method { display: flex; gap: 10px; margin: 20px 0; }
+  .method button { flex: 1; padding: 10px; font-size: 1em; cursor: pointer; border: 1px solid #ccc; border-radius: 5px; background: #eee; }
+  .method button.active { background: #007bff; color: white; border-color: #007bff; }
+  input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+  .btn { display: block; width: 100%; padding: 10px; margin-top: 20px; background: #28a745; color: white; text-align: center; border-radius: 5px; text-decoration: none; font-size: 1.1em; }
+</style>
+</head>
+<body>
 
-  // STATE
+<div class="container">
+  <h1>Доступ в FastGuide</h1>
+  <div class="price">Стоимость: <span id="price">390 RUB</span></div>
+
+  <div class="steps">
+    <div class="step active" id="stepIndicator1">1. Выбор</div>
+    <div class="step" id="stepIndicator2">2. Данные</div>
+    <div class="step" id="stepIndicator3">3. Оплата</div>
+  </div>
+
+  <div id="step1">
+    <h3>Выберите способ оплаты</h3>
+    <div class="method">
+      <button id="m_rus" onclick="choose('Банк РФ', this)">Банк РФ</button>
+      <button id="m_int" onclick="choose('Иностранный банк', this)">Иностранный банк</button>
+    </div>
+    <input type="email" id="email" placeholder="Введите ваш email">
+    <button class="btn" onclick="toStep2()">Далее</button>
+  </div>
+
+  <div id="step2" style="display:none;">
+    <h3>Подтверждение данных</h3>
+    <p>Метод оплаты: <strong id="c_method"></strong></p>
+    <p>Email: <strong id="c_email"></strong></p>
+    <p>Стоимость: <strong id="c_price"></strong></p>
+    <button class="btn" onclick="proceedToPay()">Перейти к оплате</button>
+    <a href="#" onclick="backToStep1(event)">Назад</a>
+  </div>
+
+  <div id="step3" style="display:none;">
+    <h3>Оплата</h3>
+    <p>Если страница оплаты не открылась, нажмите:</p>
+    <a id="openPayment" class="btn" href="#" target="_blank">Открыть страницу оплаты</a>
+  </div>
+</div>
+
+<script>
+  const LAVA_URL_RU = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=RUB';
+  const LAVA_URL_INT = 'https://app.lava.top/ru/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=USD';
+  const PRICE_RU = '390 RUB';
+  const PRICE_INT = '5 USD';
+
   let method = '';
   let email = '';
-  let price = PRICE_RU;
-  let payUrl = LAVA_URL_RU;
+  let payUrl = '';
 
-  // elements
-  const mRus = document.getElementById('m_rus');
-  const mInt = document.getElementById('m_int');
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const step3 = document.getElementById('step3');
-  const p1 = document.getElementById('stepIndicator1');
-  const p2 = document.getElementById('stepIndicator2');
-  const p3 = document.getElementById('stepIndicator3');
-  const cMethod = document.getElementById('c_method');
-  const cEmail = document.getElementById('c_email');
-  const openPayment = document.getElementById('openPayment');
-  const priceEls = document.querySelectorAll('.price span:first-child');
-  const confirmPriceEl = document.querySelector('#step2 .value:last-child');
-
-  // choose method
-  function choose(name, el){
+  function choose(name, el) {
     method = name;
-    [mRus, mInt].forEach(x => x.classList.remove('active'));
+    document.getElementById('m_rus').classList.remove('active');
+    document.getElementById('m_int').classList.remove('active');
     el.classList.add('active');
 
-    if(name === 'Банк РФ') {
-      price = PRICE_RU;
+    if (name === 'Банк РФ') {
+      document.getElementById('price').textContent = PRICE_RU;
       payUrl = LAVA_URL_RU;
     } else {
-      price = PRICE_INT;
+      document.getElementById('price').textContent = PRICE_INT;
       payUrl = LAVA_URL_INT;
     }
-
-    priceEls.forEach(el => el.textContent = price.split(' ')[0]);
-    confirmPriceEl.textContent = price;
-    document.getElementById('email').focus();
   }
 
-  // validation email
-  function isEmail(v){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  }
-
-  // go to confirm
-  function toStep2(){
+  function toStep2() {
     const e = document.getElementById('email').value.trim();
-    if(!method) { alert('Выберите метод оплаты'); return; }
-    if(!isEmail(e)) { alert('Введите корректный email'); document.getElementById('email').focus(); return; }
+    if (!method) { alert('Выберите метод оплаты'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { alert('Введите корректный email'); return; }
     email = e;
-    cMethod.textContent = method;
-    cEmail.textContent = email;
-    confirmPriceEl.textContent = price;
-
-    p1.classList.remove('active'); p1.classList.add('done');
-    p2.classList.add('active');
-
-    step1.style.display = 'none';
-    step2.style.display = 'block';
-    window.scrollTo({top:0,behavior:'smooth'});
+    document.getElementById('c_method').textContent = method;
+    document.getElementById('c_email').textContent = email;
+    document.getElementById('c_price').textContent = document.getElementById('price').textContent;
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('stepIndicator1').classList.remove('active');
+    document.getElementById('stepIndicator2').classList.add('active');
   }
 
-  function backToStep1(e){
-    if(e) e.preventDefault();
-    step2.style.display = 'none';
-    step1.style.display = 'block';
-    p2.classList.remove('active'); p1.classList.remove('done'); p1.classList.add('active');
+  function backToStep1(e) {
+    e.preventDefault();
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('stepIndicator2').classList.remove('active');
+    document.getElementById('stepIndicator1').classList.add('active');
   }
 
-  // proceed to payment
-  function proceedToPay(){
-    let url = payUrl;
-    try {
-      const u = new URL(payUrl);
-      if(email) u.searchParams.set('buyer_email', email);
-      u.searchParams.set('utm_source', 'fastguide_miniapp');
-      url = u.toString();
-    } catch(e){ url = payUrl; }
-
-    openPayment.href = url;
-
-    const wnd = window.open(url, '_blank');
-    if(!wnd){
-      alert('Браузер заблокировал открытие. Нажмите "Открыть страницу оплаты".');
-    }
-
-    step2.style.display = 'none';
-    step3.style.display = 'block';
-    p2.classList.remove('active'); p2.classList.add('done');
-    p3.classList.add('active');
-
-    startPolling();
+  function proceedToPay() {
+    const url = new URL(payUrl);
+    url.searchParams.set('buyer_email', email);
+    document.getElementById('openPayment').href = url.toString();
+    window.open(url.toString(), '_blank');
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'block';
+    document.getElementById('stepIndicator2').classList.remove('active');
+    document.getElementById('stepIndicator3').classList.add('active');
   }
-
-  function startPolling(){
-    const params = new URLSearchParams(location.search);
-    if(params.get('debug') === '1') document.getElementById('devActions').style.display = 'block';
-  }
-
-  function onPaid(info){
-    alert('Оплата подтверждена — выдан доступ.');
-  }
-
-  function simulateSuccess(){
-    onPaid({status:'paid'});
-  }
-
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter'){
-      if(step1.style.display !== 'none') toStep2();
-      else if(step2.style.display !== 'none') proceedToPay();
-    }
-  });
-
-  [mRus, mInt].forEach(el=>{
-    el.addEventListener('keydown', (ev)=>{
-      if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
-    });
-  });
 </script>
+
+</body>
+</html>
