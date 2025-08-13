@@ -18,7 +18,6 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#070708);color:#fff;-webkit-font-smoothing:antialiased}
-  /* center app */
   .wrap{
     min-height:100vh;
     display:flex;
@@ -34,8 +33,6 @@
     box-shadow:var(--card-shadow);
     overflow:hidden;
   }
-
-  /* header / topbar */
   .top{
     display:flex;
     align-items:center;
@@ -46,14 +43,10 @@
   }
   .top .title{font-weight:700;font-size:16px}
   .top .sub{font-size:12px;color:var(--muted)}
-
-  /* content card */
   .card{
     padding:18px;
     background:linear-gradient(180deg,var(--panel), #0b0b0c);
   }
-
-  /* steps */
   .steps{
     display:flex;align-items:center;gap:6px;margin-bottom:14px;
   }
@@ -67,50 +60,32 @@
   }
   .step.active .dot{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#02120a;box-shadow:0 8px 22px rgba(34,170,102,0.18)}
   .step.done .dot{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-
-  /* main heading */
   .heading{font-size:26px;font-weight:700;margin:6px 0 6px}
   .subhead{color:var(--muted);margin-bottom:14px}
-
-  /* payment options */
   .methods{display:flex;gap:12px;margin-bottom:14px}
   .method{
     flex:1;padding:12px;border-radius:12px;background:#151515;border:1px solid rgba(255,255,255,0.02);cursor:pointer;text-align:center;font-weight:600;color:#e9ecef
   }
   .method.active{background:#1f1f1f;box-shadow:inset 0 -4px 0 rgba(0,0,0,0.25)}
-
-  /* input */
   .field{width:100%;padding:14px;border-radius:12px;border:none;background:#0b0b0b;color:#fff;font-size:15px;margin-bottom:12px;outline:none}
   .placeholder{color:#7f858a}
-
-  /* price */
   .price-row{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0}
   .price{font-size:36px;font-weight:800;letter-spacing:-0.02em}
   .price-currency{font-size:14px;color:var(--muted);margin-left:8px;font-weight:600}
-
-  /* main button */
   .btn{
     width:100%;display:inline-block;padding:14px;border-radius:12px;border:none;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#02120a;font-weight:800;font-size:16px;cursor:pointer;
     transition:transform .12s ease, box-shadow .12s ease;
   }
   .btn:active{transform:translateY(1px)}
   .ghost{display:block;margin-top:12px;text-align:center;color:var(--muted);text-decoration:none}
-
-  /* confirm card */
   .confirm{background:#0a0a0a;border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
   .row{padding:12px;border-radius:10px;background:rgba(255,255,255,0.01);margin-bottom:8px}
   .label{font-size:12px;color:var(--muted);margin-bottom:6px}
   .value{font-size:16px;font-weight:700}
-
-  /* waiting */
   .wait{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px}
   .orb{width:96px;height:96px;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(40,194,110,0.14)}
   .wait p{font-size:18px;text-align:center;color:#e7efe9}
-
-  /* small */
   .muted{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
-
-  /* responsive */
   @media (max-width:420px){
     .heading{font-size:22px}
     .price{font-size:30px}
@@ -128,69 +103,40 @@
         </div>
         <div style="font-size:13px;color:var(--muted)">Оплата</div>
       </div>
-
       <div class="card" id="card">
-        <!-- steps -->
         <div class="steps" aria-hidden="true">
           <div class="step active" id="stepIndicator1"><div class="dot">1</div>Выбор</div>
           <div class="step" id="stepIndicator2"><div class="dot">2</div>Данные</div>
           <div class="step" id="stepIndicator3"><div class="dot">3</div>Оплата</div>
         </div>
-
-        <!-- STEP 1 -->
         <div id="step1">
           <div class="heading">Доступ в FastGuide</div>
           <div class="subhead">Выберите метод оплаты</div>
-
           <div class="methods" role="list">
             <div class="method" id="m_rus" role="button" tabindex="0" onclick="choose('Банк РФ', this)">Банк РФ</div>
             <div class="method" id="m_int" role="button" tabindex="0" onclick="choose('Иностранный банк', this)">Иностранный банк</div>
           </div>
-
           <input id="email" class="field" type="email" inputmode="email" autocomplete="email" placeholder="example@gmail.com" aria-label="Email">
-
           <div class="price-row">
             <div class="muted">Стоимость</div>
             <div class="price"><span>390</span><span class="price-currency">RUB</span></div>
           </div>
-
           <button class="btn" id="nextBtn" onclick="toStep2()">Далее</button>
         </div>
-
-        <!-- STEP 2 -->
         <div id="step2" style="display:none">
           <div class="heading" style="font-size:20px">Проверьте данные</div>
           <div class="muted" style="margin-bottom:12px">Убедитесь, что всё введено верно</div>
-
           <div class="confirm">
-            <div class="row">
-              <div class="label">Наименование товара</div>
-              <div class="value">Доступ в FastGuide</div>
-            </div>
-
-            <div class="row">
-              <div class="label">Метод оплаты</div>
-              <div id="c_method" class="value">—</div>
-            </div>
-
-            <div class="row">
-              <div class="label">Ваш E-mail</div>
-              <div id="c_email" class="value">—</div>
-            </div>
-
-            <div class="row" style="margin-bottom:0">
-              <div class="label">Стоимость</div>
-              <div id="c_price" class="value">390 RUB</div>
-            </div>
+            <div class="row"><div class="label">Наименование товара</div><div class="value">Доступ в FastGuide</div></div>
+            <div class="row"><div class="label">Метод оплаты</div><div id="c_method" class="value">—</div></div>
+            <div class="row"><div class="label">Ваш E-mail</div><div id="c_email" class="value">—</div></div>
+            <div class="row" style="margin-bottom:0"><div class="label">Стоимость</div><div id="c_price" class="value">390 RUB</div></div>
           </div>
-
           <div style="margin-top:16px">
             <button class="btn" id="payBtn" onclick="proceedToPay()">Перейти к оплате</button>
             <a class="ghost" href="#" onclick="backToStep1(event)">Вернуться назад</a>
           </div>
         </div>
-
-        <!-- STEP 3 -->
         <div id="step3" style="display:none">
           <div class="wait">
             <div class="orb" aria-hidden="true">
@@ -201,32 +147,26 @@
                 <path d="M8 16.5s1.5-1.5 4-1.5 4 1.5 4 1.5" stroke="#02120a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-
             <p><strong>Ожидание подтверждения оплаты…</strong></p>
             <a id="openPayment" class="ghost" href="#" target="_blank" rel="noopener noreferrer">Открыть страницу оплаты</a>
             <div class="muted">Если оплата подтверждена — страница обновится автоматически</div>
-
             <div id="devActions" style="margin-top:10px;display:none">
               <button style="padding:8px 12px;border-radius:8px;border:none;background:#fff;color:#000;cursor:pointer" onclick="simulateSuccess()">Симулировать оплату (debug)</button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
-
 <script>
   const LAVA_URL_RUB = 'https://app.lava.top/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=RUB';
   const LAVA_URL_USD = 'https://app.lava.top/products/9ea4bb05-5fb7-414f-9813-ac5855b2029a/9cf64ab1-f6c0-4243-a552-d1a2f0e50852?currency=USD';
   const PRODUCT = 'Доступ в FastGuide';
   const PRICE_RUB = '390 RUB';
   const PRICE_USD = '4.91 USD';
-
   let method = '';
   let email = '';
   let currentPrice = PRICE_RUB;
-
   const mRus = document.getElementById('m_rus');
   const mInt = document.getElementById('m_int');
   const step1 = document.getElementById('step1');
@@ -239,7 +179,6 @@
   const cEmail = document.getElementById('c_email');
   const cPrice = document.getElementById('c_price');
   const openPayment = document.getElementById('openPayment');
-
   function choose(name, el){
     method = name;
     [mRus, mInt].forEach(x => x.classList.remove('active'));
@@ -255,11 +194,9 @@
     }
     document.getElementById('email').focus();
   }
-
   function isEmail(v){
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }
-
   function toStep2(){
     const e = document.getElementById('email').value.trim();
     if(!method) { alert('Выберите метод оплаты'); return; }
@@ -274,14 +211,12 @@
     step2.style.display = 'block';
     window.scrollTo({top:0,behavior:'smooth'});
   }
-
   function backToStep1(e){
     if(e) e.preventDefault();
     step2.style.display = 'none';
     step1.style.display = 'block';
     p2.classList.remove('active'); p1.classList.remove('done'); p1.classList.add('active');
   }
-
   function proceedToPay(){
     let url = method === 'Банк РФ' ? LAVA_URL_RUB : LAVA_URL_USD;
     try {
@@ -291,7 +226,7 @@
       url = u.toString();
     } catch(e){}
     openPayment.href = url;
-    const wnd = window.open(url, '_blank');
+    const wnd = window.open(url, '_blank', 'noopener,noreferrer,width=800,height=600'); // изменено
     if(!wnd){
       alert('Браузер заблокировал открытие. Нажмите "Открыть страницу оплаты".');
     }
@@ -301,29 +236,24 @@
     p3.classList.add('active');
     startPolling();
   }
-
   let pollTimer = null;
   function startPolling(){
     const params = new URLSearchParams(location.search);
     if(params.get('debug') === '1') document.getElementById('devActions').style.display = 'block';
   }
-
   function onPaid(info){
     clearInterval(pollTimer);
     alert('Оплата подтверждена — выдан доступ.');
   }
-
   function simulateSuccess(){
     onPaid({status:'paid'});
   }
-
   document.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter'){
       if(step1.style.display !== 'none') toStep2();
       else if(step2.style.display !== 'none') proceedToPay();
     }
   });
-
   [mRus, mInt].forEach(el=>{
     el.addEventListener('keydown', (ev)=>{
       if(ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
@@ -332,4 +262,3 @@
 </script>
 </body>
 </html>
-
